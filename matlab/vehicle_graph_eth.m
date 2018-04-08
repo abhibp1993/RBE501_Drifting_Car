@@ -1,13 +1,13 @@
 clear all
 
 %% Stationary Velocity graph based on Numerical Calculation of: 
-%"Analysis and control of high sideslip manoeuvres" Christoph Voser, Rami
-%Hindeyeh
+%Procedure from : "Analysis and control of high sideslip manoeuvres" Christoph Voser, Rami
+%Hindeyeh 
 
-%Comment: Still wrong, infinite values near gamma = 0;
-% Need to change to equations and parameters from: 
-%"Optimization-Based Autonomous Racing of 1:43 Scale RC Cars" ALexander
-%Liniger
+%Equations from: "Optimization-Based Autonomous Racing of 1:43 Scale RC Cars" ALexander
+%Liniger 
+
+%Parameters from: "Autonomous Drift Control" Nikolaos Kariotoglou
 
 %% Initialize
 global a b m g Iz
