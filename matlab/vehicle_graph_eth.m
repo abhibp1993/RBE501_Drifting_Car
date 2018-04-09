@@ -45,10 +45,12 @@ Fz_f = m*g-Fz_r;
 
 
 %% Input Variables
-vx = linspace(1,20,50);
-gamma = linspace(-0.4,0.4,140);
+vx = linspace(1,20,51);
+gamma = linspace(-0.4,0.4,81);
 syms vy_s r_s
 
+zero_vy = 3;
+zero_yaw = 6;
 
 %% Equations
 i =20 ;
@@ -70,9 +72,13 @@ eqn4=(a*Fyf*cos(gamma(j))-b*Fyr)/Iz == 0;
 
 S = vpasolve([eqn3,eqn4],[vy_s, r_s],[0,0]);
  [vy,r1]=structput(vy,r1,S,i,j,1);
-S = vpasolve([eqn3,eqn4],[vy_s, r_s],[3,6]);
+S = vpasolve([eqn3,eqn4],[vy_s, r_s],[zero_vy,-zero_yaw]); %% Try to solve for positive vy_s, negative r_s oversteering/understeering
  [vy,r1]=structput(vy,r1,S,i,j,2);
-S = vpasolve([eqn3,eqn4],[vy_s, r_s],[-3,-6]);
+ 
+ %Initial condition for the missing spots
+%S = vpasolve([eqn3,eqn4],[vy_s, r_s],[.3,-6]);
+ 
+S = vpasolve([eqn3,eqn4],[vy_s, r_s],[-zero_vy,zero_yaw]); %% Try to solve for negative vy_s, positive r_s oversteering/understeering
  [vy,r1]=structput(vy,r1,S,i,j,3);
 
 eqn3=[];
@@ -89,6 +95,7 @@ title('Vy vs gamma')
 xlabel('gamma [rad]')
 ylabel('vy [m/s]')
 hold off 
+savefig('vy_ex.fig')
 
 figure()
 scatter(gamma(:)',r1(1,:,i),'b')
@@ -101,6 +108,69 @@ title('yaw rate vs gamma')
 xlabel('gamma [rad]')
 ylabel('r [rad/s]')
 hold off
+savefig('yaw_ex.fig')
+
+
+%% Try Regression
+vy_init=zeros(size(vy));
+yaw_init=zeros(size(vy));
+
+[vy_init(:,:,i),yaw_init(:,:,i)]=linear_regression(gamma(:),vy,r1,i);
+
+
+%% Vpa again
+ for j = 1:length(gamma)
+%[Fyf] = lateral_force(vy_s,vx(i), r_s, gamma(j),as1_f,mew_f, mew_p,Ca_f,Fz_f, 1);
+%[Fyr] = lateral_force(vy_s,vx(i), r_s, gamma(j),as1_r,mew_r, mew_p,Ca_r,Fz_r, 0);
+
+alpha_f=-atan((r_s*a+vy_s)/vx(i))+gamma(j);
+alpha_r=atan((r_s*b-vy_s)/vx(i));
+
+Fyf=Df*sin(Cf*atan(Bf*alpha_f));
+Fyr=Dr*sin(Cr*atan(Br*alpha_r));
+
+eqn3=(Fyf * cos(gamma(j)) +Fyr)/m- r_s*vx(i)==0;
+eqn4=(a*Fyf*cos(gamma(j))-b*Fyr)/Iz == 0;
+
+S = vpasolve([eqn3,eqn4],[vy_s, r_s],[0,0]);
+ [vy,r1]=structput(vy,r1,S,i,j,1);
+S = vpasolve([eqn3,eqn4],[vy_s, r_s],[vy_init(2,j,i),yaw_init(2,j,i)]); %% Try to solve for positive vy_s, negative r_s oversteering/understeering
+ [vy,r1]=structput(vy,r1,S,i,j,2);
+S = vpasolve([eqn3,eqn4],[vy_s, r_s],[vy_init(3,j,i),yaw_init(3,j,i)]); %% Try to solve for negative vy_s, positive r_s oversteering/understeering
+ [vy,r1]=structput(vy,r1,S,i,j,3);
+
+eqn3=[];
+eqn4=[];
+ end
+
+ %% Plot again
+ 
+figure()
+scatter(gamma(:)',vy(1,:,i),'b')
+hold on
+scatter(gamma(:)',vy(2,:,i),'r')
+hold on
+scatter(gamma(:)',vy(3,:,i),'g')
+title('Vy vs gamma')
+xlabel('gamma [rad]')
+ylabel('vy [m/s]')
+hold off 
+savefig('vy_ex.fig')
+
+figure()
+scatter(gamma(:)',r1(1,:,i),'b')
+hold on
+scatter(gamma(:)',r1(2,:,i),'r')
+hold on
+scatter(gamma(:)',r1(3,:,i),'g')
+
+title('yaw rate vs gamma')
+xlabel('gamma [rad]')
+ylabel('r [rad/s]')
+hold off
+savefig('yaw_ex.fig')
+ 
+%% Functions
 
 function [vy,r1] = structput(vy,r1,S,i,j,k)
 
