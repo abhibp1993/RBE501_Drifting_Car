@@ -33,12 +33,12 @@ simcase = 'PI_sample';
 switch simcase
     
     case 'drive_straight'
-        stoptime        =  15;  % simulation end time,                [s]
+        stoptime        =   5;  % simulation end time,                [s]
         switch_control  = 100;  % time when PI receives setpoint,     [s]
         switch_steering = 100;  % switch from fixed steering to PI,   [s]
         steering_step_t = 100;  % steering step time to induce drift, [s]
         steering_step   =   0;  % steering angle to induce drift
-        max_speed       =  48;  % kph 
+        max_speed       =  20;  % kph 
         lat_xmin        = -10;  % min x value, position plot, [m]
         lat_ymin        = -10;  % min y value, position plot, [m]
         lat_xmax        =  200; % max x value, position plot, [m]
