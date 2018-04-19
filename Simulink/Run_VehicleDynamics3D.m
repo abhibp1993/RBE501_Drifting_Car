@@ -29,12 +29,12 @@ open('VehicleDynamics3D_controller.slx');
 %% Pick a Sample Case, for Monte Carlo use PID
 % simcase = 'drive_straight';
 % simcase = 'shallow_turn';
-simcase = 'PID_sample';
-% simcase = 'throttle_control';
+% simcase = 'PID_sample';
+simcase = 'throttle_control';
 
 %% Choose Steering Control or Throttle Control
 ste_gain = 1;
-thl_gain = 0;
+thl_gain = 1;
 
 % Number of monte carlo cases
 n_cases = 1;
@@ -46,21 +46,37 @@ for n = 1:n_cases
 tic
 
 
-%% Random PID for Monte Carlo
-a = 1.25;
-b = 1.4;
-P = (b-a).*rand(1) + a;
-% P = 1.2095; % recommended value
+% %% Random PID for Monte Carlo, steering, should run once more
+% a = 1.25;
+% b = 1.4;
+% P = (b-a).*rand(1) + a;
+P = 1.2095; % recommended value
+% 
+% a = 0.50;
+% b = 0.6;
+% I = (b-a).*rand(1) + a;
+I =0.55564; % recommended value
+% 
+% a = 0.125;
+% b = 0.25;
+% D = (b-a).*rand(1) + a;
+D = 0.1341; % recommended value
 
-a = 0.50;
-b = 0.6;
-I = (b-a).*rand(1) + a;
-% I =0.55564; % recommended value
+%% Random PID for Monte Carlo, throttle
+a = 2.10;
+b = 2.25;
+Pt = (b-a).*rand(1) + a;
+Pt = 2.1389; % recommended value
 
-a = 0.125;
-b = 0.25;
-D = (b-a).*rand(1) + a;
-% D = 0.1341; % recommended value
+a = 0.76;
+b = 0.9;
+It = (b-a).*rand(1) + a;
+It = 0.7671; % recommended value
+
+a = 0.55;
+b = 0.70;
+Dt = (b-a).*rand(1) + a;
+Dt = 0.65979; % recommended value
 
 
 
@@ -106,7 +122,7 @@ switch simcase
         switch_steering =   3.58;  % switch from fixed steering to PI,    [s]
 %         switch_steering =   100;  % switch from fixed steering to PI,    [s]
         steering_step_t =  0.01;  % steering step time to induce drift,  [s]
-        steering_step   =  -20;  % steering angle to induce drift
+        steering_step   =  -30;  % steering angle to induce drift
         switch_throttle =  80;  % switch from fixed throttle to PI,     [s]
         switch_speed_control  = 100;  
                                 % time when speed PI receives setpoint, [s]    
@@ -117,23 +133,26 @@ switch simcase
         lat_ymax        =   50; % max y value, position plot,  [m]
         latv_setpoint   =  -12.28; % lateral velocity setpoint,   [kph]
         
-    case 'throttle_control' % still in work
-        % still workong on throttle control
-%         stoptime        =   25;  % simulation end time,                [s]
-%         switch_steering_control  = 100;  
-%                                  % time when PI receives setpoint,     [s]
-%         switch_steering =  100;  % switch from fixed steering to PI,   [s]
-%         steering_step_t =  0.01;  % steering step time to induce drift, [s]
-%         steering_step   =  -13;  % steering angle to induce drift
-%         switch_throttle =    6;  % switch from fixed throttle to PI,     [s]
-%         switch_speed_control  = 6;  
-%                                 % time when speed PI receives setpoint, [s]                
-%         max_speed       =   60;  % kph 
-%         lat_xmin        = -100;  % min x value, position plot, [m]
-%         lat_ymin        =  -10;  % min y value, position plot, [m]
-%         lat_xmax        =   25; % max x value, position plot,  [m]
-%         lat_ymax        =   50; % max y value, position plot,  [m]
-%         latv_setpoint   =   -6; % lateral velocity setpoint,   [kph]
+    case 'throttle_control' 
+%         still workong on throttle control
+        stoptime        =   25;  % simulation end time,                [s]
+        switch_steering_control  = 3.58;  
+                                % time when PI receives setpoint,       [s]
+        switch_steering =   3.58;  % switch from fixed steering to PI,    [s]
+        switch_steering =  100;  % switch from fixed steering to PI,   [s]
+        steering_step_t =  0.01;  % steering step time to induce drift, [s]
+        steering_step   =  -30;  % steering angle to induce drift
+        switch_throttle =    3.28;  % switch from fixed throttle to PI,     [s]
+        switch_speed_control  = 3.28;  
+                                % time when speed PI receives setpoint, [s]      
+%         switch_speed_control  = 100;  
+                                % time when speed PI receives setpoint, [s]                           
+        max_speed       =   80;  % kph 
+        lat_xmin        = -100;  % min x value, position plot, [m]
+        lat_ymin        =  -10;  % min y value, position plot, [m]
+        lat_xmax        =   25; % max x value, position plot,  [m]
+        lat_ymax        =   50; % max y value, position plot,  [m]
+        latv_setpoint   =   -12.28; % lateral velocity setpoint,   [kph]
         
 end
 
@@ -150,7 +169,7 @@ spd   = simout.Speed_input.Data;
 figure;
 subplot(3,1,1)
 hold on
-plot(tout,Vx_NR)
+plot(tout,Vx_NR,'m:')
 grid on
 ylabel('[kph]')
 ylim([-30 30])
@@ -162,7 +181,7 @@ plot([5 stoptime],[mean(Vx_NR(501:end)) mean(Vx_NR(501:end))])
 legend('drift v',['mean : ' num2str(mean(Vx_NR(501:end)))])
 
 subplot(3,1,2)
-plot(tout,ster)
+plot(tout,ster,'m:')
 grid on
 ylabel('[degrees]')
 title('Car Steering Angle')
@@ -171,7 +190,7 @@ title('Car Steering Angle')
 wheel_rpm = spd/0.3/2/pi;
 
 subplot(3,1,3)
-plot(tout,wheel_rpm)
+plot(tout,wheel_rpm,'m:')
 grid on
 ylabel('[rpm]')
 title('Rear Wheel Speed')
@@ -191,16 +210,16 @@ toPPT(gcf); % By default a new slide is created when adding a figure
 toPPT('setTitle',['P: ' num2str(P) ' I: ' num2str(I) ' D: ' num2str(D) ' normr: ' num2str(S.normr)]);
 toc
 
-close gcf
+% close gcf
 
 end
 
 %% if desired, uncomment to save results to a randomly named .mat file
 % uniquename = ['MCout' randseq(3) '.mat'];
 % save(uniquename,'MCout')
-
-
-%% if desired, uncomment to plot results
+% 
+% 
+% %% if desired, uncomment to plot results
 % figure
 % scatter3(MCout(1,:),MCout(2,:),MCout(3,:),3,MCout(4,:))
 % xlabel('steering angle [deg]')
