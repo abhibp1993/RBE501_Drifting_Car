@@ -66,7 +66,7 @@ init_y = linspace(0.7,0.3, length(num));
 
 z=2;
 %% Equations
-i =50 ;
+i =25 ;
 vy=[];
 r1=[];
 
