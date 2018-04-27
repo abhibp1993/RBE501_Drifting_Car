@@ -8,7 +8,7 @@ run('VehicleDynamicsInitialization.m');
 
 %% Front BCD Parameters Test
 Stoptime = 50; 
-test_iter=40;
+test_iter=10;
 
 steer_input_max = 10;  %cm 
 vx_choice = linspace(30,70,test_iter+1); %kph;
@@ -21,14 +21,17 @@ for i=1:test_iter
     simout(i)=sim('VehicleDynamics3D_old.slx');
 end
 
+
 %% Data Processing
+
 
 perm_Fl = [0 -1 0 ; 0 0 1; 1 0 0];
 perm_Fr = [0 1 0 ; 0 0 -1; 1 0 0];
 perm_Rl = [0 -1 0; 0 0 1; 1 0 0];
 perm_Rr = [0 1 0; 0 0 -1; 1 0 0];
     
-for i = 1:40
+for i = 1:test_iter
+ %for i = 1:1
 for j=1:length(simout(i).tout)
     S(i).F_Fl_whe(1:3,j)=perm_Fl*simout(i).rot_l(:,:,j).'*[simout(i).F_Fl(j,1:2), 0 ].';
     S(i).F_Fr_whe(1:3,j)=perm_Fr*simout(i).rot_R(:,:,j).'*[simout(i).F_Fr(j,1:2), 0 ].';
@@ -44,8 +47,7 @@ for j=1:length(simout(i).tout)
     S(i).slip_Fr(j) = atan(S(i).V_Fr(2,j)./S(i).V_Fr(1,j));
     S(i).slip_Rl(j) = atan(S(i).V_Rl(2,j)./S(i).V_Rl(1,j));
     S(i).slip_Rr(j) = atan(S(i).V_Rr(2,j)./S(i).V_Rr(1,j));
-    
-    
+   
     S(i).F_Favg(1:3,j)=(S(i).F_Fl_whe(1:3,j)+S(i).F_Fr_whe(1:3,j))/2;
     S(i).F_Ravg(1:3,j)=(S(i).F_Rl_whe(1:3,j)+S(i).F_Rr_whe(1:3,j))/2;
     
@@ -55,13 +57,35 @@ for j=1:length(simout(i).tout)
     S(i).Slip_Favg(j)=(S(i).slip_Fl(j)+S(i).slip_Fr(j))/2;
     S(i).Slip_Ravg(j)=(S(i).slip_Rl(j)+S(i).slip_Rr(j))/2;
     
-    
-    
-    
 end
-S(i).steer_ang = get_steer(simout(i).rot_R,simout(i).rot_l);
+S(i).steer_ang = get_steer2(simout(i).Rw_rc,simout(i).rot_R,simout(i).rot_l);
 end
 
+
+for i = 1:test_iter
+    S(i).tout=simout(i).tout;
+    S(i).yaw_rate=simout(i).yaw_rate;
+    S(i).yaw_acc=simout(i).yaw_acc;
+for j=length(simout(i).tout):-1:1
+   if (S(i).slip_Rr(j)<0 || S(i).slip_Rl(j)<0) 
+       
+    S(i).F_Favg(:,j)=[];
+    S(i).F_Ravg(:,j)=[];
+    
+    S(i).V_Favg(:,j)=[];
+    S(i).V_Ravg(:,j)=[];
+    
+    S(i).Slip_Favg(j)=[];
+    S(i).Slip_Ravg(j)=[];
+    
+    S(i).steer_ang(j) = [];
+    S(i).yaw_rate(j)=[];
+    S(i).yaw_acc(j)=[];
+    S(i).tout(j)=[];
+    
+   end
+end
+end
 
 
 %% Plot
@@ -75,8 +99,22 @@ plot(simout(2).tout',S(2).F_Rl_whe(1,:),'r')
 hold on
 plot(simout(2).tout',S(2).F_Rl_whe(2,:),'r--')
 
+close all 
+figure()
+plot(S(1).tout',S(1).Slip_Ravg(:),'r')
+
+figure()
+plot(S(2).tout',S(2).Slip_Ravg(:),'b')
+
+legend('first','second')
+
+figure()
+scatter(S(2).Slip_Ravg(:),S(2).F_Ravg(2,:).')
+
+
+
 %% Save
 
-save('BCD_front.mat','simout','S');
+save('Inertiashit.mat','simout','S');
 
 

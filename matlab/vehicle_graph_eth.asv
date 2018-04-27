@@ -66,7 +66,7 @@ init_y = linspace(0.7,0.3, length(num));
 
 z=2;
 %% Equations
-i =50 ;
+i =70 ;
 vy=[];
 r1=[];
 
@@ -100,7 +100,7 @@ eqn4=(a*Fyf*cos(gamma(j))-b*Fyr)/Iz == 0;
  [vy,r1]=structput(vy,r1,S,i,j,1);
 S = vpasolve([eqn3,eqn4],[vy_s, r_s],[init_s(find(num==i)), init_vy(2,z);-init_r(2,z), -init_y(find(num==i))]); %% Try to solve for positive vy_s, negative r_s oversteering/understeering
  [vy,r1]=structput(vy,r1,S,i,j,2);
-S = vpasolve([eqn3,eqn4],[vy_s, r_s],[-init_vy(2,z),-init_s(find(num==i));init_s(find(num==i)), init_r(2,z)]); %% Try to solve for negative vy_s, positive r_s oversteering/understeering
+S = vpasolve([eqn3,eqn4],[vy_s, r_s],[-init_vy(2,z),-init_s(find(num==i));init_r(1,z), init_r(2,z)]); %% Try to solve for negative vy_s, positive r_s oversteering/understeering
  [vy,r1]=structput(vy,r1,S,i,j,3);
     
      

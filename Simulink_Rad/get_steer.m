@@ -1,4 +1,4 @@
-function [steer]=get_steer(rot_R,rot_l)
+function [steer]=get_steer(rotw,rot_R,rot_l)
 
 for i=1:length(rot_R)
 Rot_R2(:,:,i) =[rot_R(1,2:3,i) 0;rot_R(2,2:3,i) 0;0 0 1] ;
