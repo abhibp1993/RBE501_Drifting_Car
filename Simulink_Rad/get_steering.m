@@ -83,3 +83,4 @@ xlabel('steering input [cm]')
 ylabel('avgLandR steering output [rad]')
 grid('on')
 
+constant = ( avg(3500)-avg(3000))/(simout.steering_input(3500)-simout.steering_input(3000));

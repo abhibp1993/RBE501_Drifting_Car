@@ -65,8 +65,8 @@ steeringFilterTimeConst = 0.5;
 steeringJointStiffness = 1;
 steeringJointDamping = 1;
 
-maxSteeringDisplacement = 10; %cm
-minSteeringDisplacement = -10; %cm
+maxSteeringDisplacement = 12; %cm
+minSteeringDisplacement = -12; %cm
 
 SixDOFdamp = 16;
 
